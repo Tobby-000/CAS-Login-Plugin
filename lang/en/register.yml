@@ -1,0 +1,5 @@
+title : CAS register
+notice : You have been authenticated via CAS, please set your in-game name and password to complete registration
+id: Display Name
+pwd: Password (min 6 characters)
+submit : Complete Registration

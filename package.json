@@ -1,15 +1,19 @@
 {
-  "name": "",
-  "title": "",
-  "version": "0.1.0",
-  "description": "",
-  "author": "",
-  "url": "",
-  "namespace": "",
+  "name": "cas-login",
+  "title": "CAS登录插件",
+  "version": "1.0.0",
+  "description": "为Blessing Skin提供CAS单点登录支持",
+  "author": "Tobby_000",
+  "url": "www.komonmc.cn",
+  "namespace": "minejufe\\cas",
   "require": {
-    "blessing-skin-server": "^5.0.0"
+    "blessing-skin-server": "^6"
   },
   "enchants": {
-    "config": "Configuration"
+    "config": "Configuration",
+    "icon": {
+      "fa": "sign-in-alt",
+      "bg": "teal"
+    }
   }
 }
