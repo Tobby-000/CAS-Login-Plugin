@@ -17,6 +17,7 @@ use minejufe\cas\Controllers\RegisterController
 
 class LoginController extends Controller
 { 
+
     public function Login()
     {
         // 后面的代码都不用看
@@ -31,10 +32,12 @@ class LoginController extends Controller
                 $_SESSION[LOGIN_KEY] = true;
                 session_commit();
                 redirectTargetUrl();
-        } else {
-            header('Location: ' . BASH_PATH . LOGOUT_URI);
-        }
-        } else {
+            } 
+            else {
+                header('Location: ' . BASH_PATH . LOGOUT_URI);
+            }
+        } 
+        else {
             redirectTargetUrl();
         }
 
@@ -63,10 +66,13 @@ class LoginController extends Controller
             return redirect()->route('cas.register');
         }
         else {
+            $this->cleanUp();
             Auth::login($user, true);
         }
         return true;
-
         // 业务系统的登录逻辑   结束
+    }
+    public function cleanUp(){
+        phpCAS::logout();
     }
 }

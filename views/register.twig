@@ -2,6 +2,7 @@
 {%block title%}{{trans('minejufe\\cas::register.title')}}{%endblock%}
 {% block content %}
     <p style="text-align: center;">{{trans('minejufe\\cas::register.notice')}}</p>
+    <p style="text-align: center;">{{trans('minejufe\\cas::register.check')}}{{ casUsername }}</p>
         <form action="/auth/cas/login" method="post">
         {{ csrf_field() }}
             <div class="input-group mb-3">
