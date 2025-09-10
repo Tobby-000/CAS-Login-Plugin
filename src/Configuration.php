@@ -4,11 +4,15 @@ namespace minejufe\cas;
 
 use Option;
 use App\Services\OptionForm;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Redirect;
 
 class Configuration
 {
     public function render()
     {
+        
         $form = Option::form('cas_settings', trans('minejufe\cas::config.form_title'), function ($form) {
             
             $form
@@ -39,7 +43,7 @@ class Configuration
                 ->text('session_user_key', trans('minejufe\cas::config.session_user_key_label'))
                 ->placeholder(trans('minejufe\cas::config.session_user_key_placeholder'))
                 ->value(Option::get('session_user_key', 'supwisdomCasLoginUser'));
-            
+            $form->type('info');
             // 添加国际化消息
             $form->addMessage(trans('minejufe\cas::config.info_message'), 'info');
             
@@ -49,6 +53,9 @@ class Configuration
             
             $form->after(function ($form) {
                 // 后处理逻辑
+                Cache::forget('options');
+                $form->type('success');
+                
             });
         })->handle(function () {
             Option::set('base_path', request('base_path', 'https://cas.example.com/cas'));
@@ -58,10 +65,14 @@ class Configuration
             Option::set('redirect_key', request('redirect_key', 'service'));
             Option::set('session_login_key', request('session_login_key', 'isSupwisdomCasLogin'));
             Option::set('session_user_key', request('session_user_key', 'supwisdomCasLoginUser'));
+            Cache::forget('options');
+            // 使用303状态码重定向，避免POST刷新问题
+            return redirect()->back()
+                ->with('success')
+                ->setStatusCode(303);
         });
         
-        $form->type('info');
-        $form->handle();
+        
         
         return view('minejufe\cas::config', compact('form'));
     }

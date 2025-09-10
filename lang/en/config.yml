@@ -1,4 +1,4 @@
-form_title: "CAS Settings"
+title: "CAS Settings"
 base_path_label: "CAS Server Address"
 base_path_placeholder: "Enter URL, e.g.: https://cas.example.com/cas"
 login_uri_label: "Login URI"

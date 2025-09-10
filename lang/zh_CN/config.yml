@@ -1,4 +1,4 @@
-form_title: "CAS设置"
+title: "CAS设置"
 base_path_label: "CAS服务器地址"
 base_path_placeholder: "请输入URL，例如：https://cas.example.com/cas"
 login_uri_label: "登录URI"

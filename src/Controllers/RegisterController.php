@@ -15,6 +15,7 @@ use App\Events;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 use minejufe\cas\Controllers\CasLoginController;
+use Illuminate\Support\Facades\Session;
 
 class RegisterController extends Controller
 {
@@ -53,7 +54,7 @@ class RegisterController extends Controller
         $user->score = option('user_initial_score');
         $user->avatar = 0;
         $user->verified = 1;
-        $user->password = Hash::make($pwd);
+        $user->password = Hash::make($password);
         $user->ip = $request->ip();
         $user->player_name=$id;
         $user->nickname=$id;
@@ -64,7 +65,7 @@ class RegisterController extends Controller
         Auth::login($user, true);
         // 注册成功后，清除cas_user session
         Session::forget('cas_user');
-        CasLoginController::cleanup();
+        (new CasLoginController)->cleanUp();
         return redirect('/user')->with('status', '注册成功并已登录。');
     }
 }
