@@ -15,12 +15,14 @@ use Carbon\Carbon;
 use phpCAS;
 use App\Services\Facades\Option;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\URL;
 
 class CasLoginController extends Controller
 { 
     public function __construct()
     {
         $this->BASE_PATH = Option::get('base_path','https://cas.example.com/cas');
+        $this->APP_URL = Option::get('app_url', 'https://mc.jxufe.edu.cn');
         $this->LOGIN_URI = Option::get('login_uri','/login');
         $this->LOGOUT_URI = Option::get('logout_uri','/logout');
         $this->WELCOME_URI = Option::get('welcome_uri','/index.html');
@@ -33,20 +35,61 @@ class CasLoginController extends Controller
         $host = $url['host'];
         $port = $url['port'] ?? ($url['scheme'] === 'https' ? 443 : 80);
         $path = $url['path'] ?? '';
-        phpCAS::client(CAS_VERSION_2_0, $host, $port, $path, '');
-        phpCAS::setNoCasServerValidation();
-        if(debug)
-            phpCAS::setDebug(storage_path('logs/cas.log'));
-        // 如需设置超时，确保phpCAS版本支持
-        // if (method_exists('phpCAS', 'setClientTimeout')) phpCAS::setClientTimeout(10);
+        $serviceBaseUrl = $this->APP_URL;
+        \phpCAS::client(CAS_VERSION_2_0, $host, $port, $path, $serviceBaseUrl);
+        \phpCAS::setNoCasServerValidation();
+        
+        // 监听单点登出请求
+        try {
+            \phpCAS::handleLogoutRequests();
+        } catch (\Throwable $e) {
+            \Log::warning('phpCAS handleLogoutRequests not available: ' . $e->getMessage());
+        }
+        if (config('app.debug')) {
+            try {
+                \phpCAS::setDebug(storage_path('logs/cas.log'));
+            } catch (\Throwable $e) {
+                \Log::warning('phpCAS setDebug failed: ' . $e->getMessage());
+            }
+        }
     }
     
-    public function Login()
+        public function Login()
     {
-        if (!Session::has($this->LOGIN_KEY) || !Session::get($this->LOGIN_KEY)) {
-            phpCAS::forceAuthentication();
-            $loginUser = phpCAS::getAttributes();
-            $loginUser['account'] = phpCAS::getUser();
+        // 保存重定向目标
+        $incomingTarget = request($this->REDIRECT_KEY) ?: request('target');
+        if ($incomingTarget) {
+            Session::put('cas_redirect_target', $incomingTarget);
+            Session::save();
+        }
+        
+        // 设置服务URL（移除ticket参数）
+        $base = URL::current();
+        $query = request()->query();
+        unset($query['ticket']); // 关键：移除票据参数
+        
+        if ($incomingTarget) {
+            $query[$this->REDIRECT_KEY] = $incomingTarget;
+            if ($this->REDIRECT_KEY !== 'target') {
+                $query['target'] = $incomingTarget;
+            }
+        }
+        
+        $serviceUrl = $base . (empty($query) ? '' : ('?' . http_build_query($query)));
+        try {
+            \phpCAS::setFixedServiceURL($serviceUrl);
+        } catch (\Throwable $e) {
+            \Log::warning('phpCAS setFixedServiceURL failed: ' . $e->getMessage());
+        }
+
+        // === 核心修改：使用forceAuthentication()替代isAuthenticated() ===
+        try {
+            // 强制认证（自动完成服务器通信和票据验证）
+            \phpCAS::forceAuthentication();
+            
+            // 认证成功后处理登录逻辑
+            $loginUser = \phpCAS::getAttributes();
+            $loginUser['account'] = \phpCAS::getUser();
             
             $loginResult = $this->doLogin($loginUser);
             if ($loginResult === true) {
@@ -59,23 +102,29 @@ class CasLoginController extends Controller
             } else {
                 return redirect($this->BASE_PATH . $this->LOGOUT_URI);
             }
-        } else {
-            return $this->redirectTargetUrl();
+        } catch (\Throwable $e) {
+            \Log::error('CAS认证失败: ' . $e->getMessage());
+            return redirect($this->BASE_PATH . $this->LOGOUT_URI);
         }
     }
     
     private function redirectTargetUrl()
     {
+        $target = Session::pull('cas_redirect_target');
+        if ($target) {
+            return redirect($target);
+        }
         if (request()->has($this->REDIRECT_KEY)) {
             return redirect(request($this->REDIRECT_KEY));
-        } else {
-            return redirect($this->BASE_PATH . $this->WELCOME_URI);
         }
+        return redirect($this->REDIRECT_KEY . '/' . ltrim($this->WELCOME_URI, '/'));
     }
     
     private function doLogin(array $loginUser = array())
     {
-        $user = User::where('email', $loginUser['account'].'@stu.jufe.edu.cn')->first();
+        $emailSuffix = Option::get('email_suffix', '@stu.jxufe.edu.cn');
+        $email = $loginUser['account'] . $emailSuffix;
+        $user = User::where('email', $email)->first();
         
         if (!$user) {
             Session::put('cas_user', $loginUser);
@@ -90,6 +139,7 @@ class CasLoginController extends Controller
     public function cleanUp(){
         Session::forget($this->LOGIN_KEY);
         Session::forget($this->LOGIN_USER_KEY);
-        phpCAS::logout();
+        session_destroy(); 
+        //phpCAS::logout();
     }
 }

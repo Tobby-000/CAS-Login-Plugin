@@ -36,7 +36,8 @@ class RegisterController extends Controller
             return redirect()->route('cas.login');
         }
         $casAccount = $casUser['account'];
-        $email = $casAccount . '@stu.jufe.edu.cn'; // 使用CAS账号构建邮箱
+        $emailSuffix = Option::get('email_suffix', '@stu.jxufe.edu.cn');
+        $email = $casAccount . $emailSuffix; // 使用CAS账号构建邮箱
                 // 再次检查是否已经注册（防止重复提交）
         if (User::where('email', $email)->exists()) {
             // 如果已经注册，直接登录

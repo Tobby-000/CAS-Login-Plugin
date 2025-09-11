@@ -3,7 +3,7 @@
 {% block content %}
     <p style="text-align: center;">{{trans('minejufe\\cas::register.notice')}}</p>
     <p style="text-align: center;">{{trans('minejufe\\cas::register.check')}}{{ casUsername }}</p>
-        <form action="/auth/cas/login" method="post">
+        <form action="/cas/register" method="post">
         {{ csrf_field() }}
             <div class="input-group mb-3">
                 <input type="text" class="form-control" placeholder="{{trans('minejufe\\cas::register.id')}}" name="id" required>
