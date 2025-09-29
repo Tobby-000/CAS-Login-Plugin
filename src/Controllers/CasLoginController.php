@@ -52,7 +52,7 @@ class CasLoginController extends Controller
         }
     }
     
-    public function Login()
+        public function Login()
     {
         $incomingTarget = request($this->REDIRECT_KEY) ?: request('target');
         if ($incomingTarget) {
