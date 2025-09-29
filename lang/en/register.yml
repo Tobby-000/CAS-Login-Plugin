@@ -1,6 +1,10 @@
 title : CAS register
-notice : You have been authenticated via CAS, please set your in-game name and password to complete registration
-id: Display Name
-pwd: Password (min 6 characters)
+notice : Please set your in-game name and password to complete registration
+notice2 : Please avoid using sensitive information such as student ID as username below
+id: Display Name， can be duplicated
+pwd: Password (min 6 characters), used for client login
 submit : Complete Registration
+playerid: In-game Name， please ensure uniqueness
 check : Please check your CAS account:
+info1: If you have not registered, we will automatically register for you. By registering, you agree to
+info2: 《MINE-JUFE Privacy Policy》

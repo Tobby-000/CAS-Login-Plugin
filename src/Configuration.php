@@ -14,7 +14,10 @@ class Configuration
     {
         
         $form = Option::form('cas_settings', trans('minejufe\cas::config.form_title'), function ($form) {
-            
+            $form
+                ->text('app_url', trans('minejufe\cas::config.app_url_label'))
+                ->placeholder(trans('minejufe\cas::config.app_url_placeholder'))
+                ->value(Option::get('app.url', 'https://mc.jxufe.edu.cn'));
             $form
                 ->text('base_path', trans('minejufe\cas::config.base_path_label'))
                 ->placeholder(trans('minejufe\cas::config.base_path_placeholder'))
@@ -43,6 +46,10 @@ class Configuration
                 ->text('session_user_key', trans('minejufe\cas::config.session_user_key_label'))
                 ->placeholder(trans('minejufe\cas::config.session_user_key_placeholder'))
                 ->value(Option::get('session_user_key', 'supwisdomCasLoginUser'));
+            $form
+                ->text('email_suffix', trans('minejufe\cas::config.email_suffix_label'))
+                ->placeholder(trans('minejufe\cas::config.email_suffix_placeholder'))
+                ->value(Option::get('email_suffix', '@stu.jxufe.edu.cn'));
             $form->type('info');
             // 添加国际化消息
             $form->addMessage(trans('minejufe\cas::config.info_message'), 'info');
@@ -53,11 +60,13 @@ class Configuration
             
             $form->after(function ($form) {
                 // 后处理逻辑
-                Cache::forget('options');
+
                 $form->type('success');
                 
             });
         })->handle(function () {
+            Option::set('email_suffix',request('email_suffix','@stu.jxufe.edu.cn'));
+            Option::set('app_url', request('app_url', 'https://mc.jxufe.edu.cn'));
             Option::set('base_path', request('base_path', 'https://cas.example.com/cas'));
             Option::set('login_uri', request('login_uri', '/login'));
             Option::set('logout_uri', request('logout_uri', '/logout'));
@@ -65,11 +74,6 @@ class Configuration
             Option::set('redirect_key', request('redirect_key', 'service'));
             Option::set('session_login_key', request('session_login_key', 'isSupwisdomCasLogin'));
             Option::set('session_user_key', request('session_user_key', 'supwisdomCasLoginUser'));
-            Cache::forget('options');
-            // 使用303状态码重定向，避免POST刷新问题
-            return redirect()->back()
-                ->with('success')
-                ->setStatusCode(303);
         });
         
         

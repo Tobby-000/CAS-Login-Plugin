@@ -2,14 +2,15 @@
 {%block title%}{{trans('minejufe\\cas::register.title')}}{%endblock%}
 {% block content %}
     <p style="text-align: center;">{{trans('minejufe\\cas::register.notice')}}</p>
-    <p style="text-align: center;">{{trans('minejufe\\cas::register.check')}}{{ casUsername }}</p>
-        <form action="/auth/cas/login" method="post">
+    <p style="text-align: center;">{{trans('minejufe\\cas::register.check')}}<span style="color: red">{{ casUsername }}</span></p>
+    <p style="text-align: center;">{{trans('minejufe\\cas::register.notice2')}}</p>
+        <form action="/cas/register" method="post">
         {{ csrf_field() }}
             <div class="input-group mb-3">
                 <input type="text" class="form-control" placeholder="{{trans('minejufe\\cas::register.id')}}" name="id" required>
                 <div class="input-group-append">
                     <div class="input-group-text">
-                        <span class="fas fa-user-graduate"></span>
+                        <span class="fas fa-user"></span>
                     </div>
                 </div>
             </div>
@@ -21,10 +22,22 @@
                     </div>
                 </div>
             </div>
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" placeholder="{{trans('minejufe\\cas::register.playerid')}}" name="playerid" required>
+                <div class="input-group-append">
+                    <div class="input-group-text">
+                        <span class="fas fa-gamepad"></span>
+                    </div>
+                </div>
+            </div>
             <div class="row">
                 <div class="col-12">
                     <button type="submit" id="loginButton" class="btn btn-primary btn-block">{{trans('minejufe\\cas::register.submit')}}</button>
                 </div>
             </div>
         </form>
+        </br>
+        <div class="callout callout-info">
+        {{trans('minejufe\\cas::register.info1')}}<a href='https://www.komonmc.cn/archives/privacy' target='_blank'>{{trans('minejufe\\cas::register.info2')}}</a>
+        </div>
 {% endblock %}
