@@ -25,7 +25,7 @@ class RegisterController extends Controller
         $casUser = Session::get('cas_user');
         if (!$casUser || !isset($casUser['account'])) {
             // 如果没有CAS用户信息，重定向到CAS登录
-            return redirect()->route('cas.login');
+            return redirect()->route('temp.login');
         }
         return view('minejufe\cas::register',['casUsername'=>$casUser['account']]);
     }
@@ -45,6 +45,7 @@ class RegisterController extends Controller
             $user = User::where('email', $email)->first();
             Auth::login($user, true);
             Session::forget('cas_user');
+            (new CasLoginController)->cleanUp();
             return redirect('/user')->with('status', '您已注册，已自动登录。');
         }
             // 验证输入
