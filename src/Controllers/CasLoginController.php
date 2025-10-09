@@ -36,7 +36,9 @@ class CasLoginController extends Controller
         $path = $url['path'] ?? '';
         $serviceBaseUrl = $this->APP_URL;
         \phpCAS::client(CAS_VERSION_2_0, $host, $port, $path, $serviceBaseUrl);
-        \phpCAS::setNoCasServerValidation();
+
+        //信任linux（Ubuntu）系统中的CA根证书
+        \phpCAS::setCasServerCACert('/etc/ssl/certs/ca-certificates.crt');
         
         try {
             \phpCAS::handleLogoutRequests();
